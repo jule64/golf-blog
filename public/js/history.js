@@ -37,7 +37,10 @@ function renderCard(s) {
         </div>
         <div class="venue">${s.venue_name || 'Unknown venue'}</div>
         ${noteExcerpt ? `<div class="note-excerpt">${noteExcerpt}</div>` : ''}
-        ${s.ai_summary ? `<div class="ai-summary" style="margin-top:.75rem;">${s.ai_summary.slice(0,200)}${s.ai_summary.length>200?'…':''}</div>` : ''}
+        ${s.ai_summary
+          ? `<div class="ai-summary" style="margin-top:.75rem;">${s.ai_summary.slice(0,200)}${s.ai_summary.length>200?'…':''}</div>`
+          : `<div style="margin-top:.75rem;"><button class="btn btn-sm btn-secondary" onclick="regenerateSummary(${s.id}, this)">✨ Generate AI summary</button></div>`
+        }
       </div>
       <div style="text-align:right;">
         ${s.type === 'round' && s.score != null ? `<div class="score-badge">${s.score}</div>` : ''}
@@ -58,6 +61,22 @@ async function load() {
     el.innerHTML = `<div class="empty"><p>No sessions yet.</p><a href="/add-session.html" class="btn btn-primary">Add your first session</a></div>`;
   } else {
     el.innerHTML = sessions.map(renderCard).join('');
+  }
+}
+
+async function regenerateSummary(id, btn) {
+  btn.disabled = true;
+  btn.textContent = 'Generating…';
+  const res = await fetch(`/api/sessions/${id}/regenerate-summary`, { method: 'POST' });
+  if (res.ok) {
+    const { ai_summary } = await res.json();
+    btn.closest('.card').querySelector('.ai-summary, button[onclick^="regenerateSummary"]').outerHTML =
+      `<div class="ai-summary" style="margin-top:.75rem;">${ai_summary.slice(0,200)}${ai_summary.length>200?'…':''}</div>`;
+  } else {
+    const { error } = await res.json();
+    btn.textContent = '✨ Generate AI summary';
+    btn.disabled = false;
+    alert('Failed: ' + error);
   }
 }
 
