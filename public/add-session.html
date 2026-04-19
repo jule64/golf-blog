@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golf Blog — Add Session</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">⛳ Golf Blog</a>
+    <a href="/">History</a>
+    <a href="/add-session.html" class="active">Add Session</a>
+    <a href="/scorecard.html">Scorecards</a>
+    <a href="/stats.html">My Stats</a>
+  </nav>
+  <div class="container" style="max-width:700px;">
+    <div class="page-header">
+      <h1 id="page-title">Add Session</h1>
+    </div>
+    <div class="card">
+      <form id="session-form">
+
+        <!-- Type toggle -->
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label>Session type</label>
+          <div class="toggle-group">
+            <button type="button" class="active" data-type="round">Round</button>
+            <button type="button" data-type="range">Range / Practice</button>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Date -->
+          <div class="form-group">
+            <label for="date">Date *</label>
+            <input type="date" id="date" required>
+          </div>
+
+          <!-- Venue -->
+          <div class="form-group">
+            <label for="venue">Venue</label>
+            <select id="venue">
+              <option value="">— select or type below —</option>
+            </select>
+          </div>
+
+          <!-- Manual venue name (shown when no selection) -->
+          <div class="form-group" id="manual-venue-wrap" style="display:none;">
+            <label for="venue-name">Venue name (manual)</label>
+            <input type="text" id="venue-name" placeholder="e.g. St Andrews Old Course">
+          </div>
+        </div>
+
+        <!-- Round-only fields -->
+        <div id="round-fields">
+          <div class="section-title">Score</div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="score">Total score</label>
+              <input type="number" id="score" min="18" max="200" placeholder="e.g. 92">
+            </div>
+            <div class="form-group">
+              <label>Score mode</label>
+              <div class="toggle-group" id="score-mode-toggle">
+                <button type="button" class="active" data-mode="vs100">vs 100 (default)</button>
+                <button type="button" data-mode="vspar">vs Par</button>
+              </div>
+            </div>
+            <div class="form-group" id="par-wrap" style="display:none;">
+              <label for="course-par">Course par</label>
+              <input type="number" id="course-par" min="30" max="80" placeholder="e.g. 72">
+            </div>
+          </div>
+        </div>
+
+        <!-- Rating -->
+        <div class="section-title">Rating</div>
+        <div class="form-group" style="margin-bottom:1.25rem;">
+          <label>How did it go? *</label>
+          <div class="star-input" id="star-input">
+            <span data-val="1">★</span>
+            <span data-val="2">★</span>
+            <span data-val="3">★</span>
+            <span data-val="4">★</span>
+            <span data-val="5">★</span>
+          </div>
+          <input type="hidden" id="rating" value="">
+        </div>
+
+        <!-- Note -->
+        <div class="form-group" style="margin-bottom:1.5rem;">
+          <label for="note">Notes / Summary</label>
+          <textarea id="note" placeholder="How did you play? What worked, what didn't?"></textarea>
+        </div>
+
+        <!-- Hole-by-hole (optional, shown when venue has scorecard) -->
+        <div id="hole-section" style="display:none;">
+          <div class="section-title">Hole-by-hole scores <span style="font-weight:400;text-transform:none;color:var(--gray-400)">(optional)</span></div>
+          <div class="hole-grid" id="hole-grid"></div>
+          <div style="margin-top:.75rem;font-size:.85rem;color:var(--gray-400);">
+            Total from holes: <strong id="hole-total">0</strong>
+            <button type="button" id="apply-total" class="btn btn-sm btn-secondary" style="margin-left:.5rem;">Apply to score</button>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:.75rem;margin-top:1.5rem;">
+          <button type="submit" class="btn btn-primary" id="save-btn">Save session</button>
+          <a href="/" class="btn btn-secondary">Cancel</a>
+          <span id="saving-msg" style="display:none;color:var(--gray-400);align-self:center;font-size:.9rem;">Saving &amp; generating AI summary…</span>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script src="/js/add-session.js"></script>
+</body>
+</html>

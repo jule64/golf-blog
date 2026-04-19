@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golf Blog — History</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">⛳ Golf Blog</a>
+    <a href="/" class="active">History</a>
+    <a href="/add-session.html">Add Session</a>
+    <a href="/scorecard.html">Scorecards</a>
+    <a href="/stats.html">My Stats</a>
+  </nav>
+  <div class="container">
+    <div class="page-header">
+      <h1>Round History</h1>
+      <span class="spacer"></span>
+      <a href="/add-session.html" class="btn btn-primary">+ Add Session</a>
+    </div>
+    <div class="filter-bar">
+      <div class="toggle-group">
+        <button class="active" data-filter="all">All</button>
+        <button data-filter="round">Rounds</button>
+        <button data-filter="range">Range</button>
+      </div>
+    </div>
+    <div id="sessions-list"></div>
+  </div>
+  <script src="/js/history.js"></script>
+</body>
+</html>

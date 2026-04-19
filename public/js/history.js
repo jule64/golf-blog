@@ -1,0 +1,80 @@
+let currentFilter = 'all';
+
+function stars(n) {
+  return '★'.repeat(n) + '☆'.repeat(5 - n);
+}
+
+function vsPar(score, course_par) {
+  if (score == null) return null;
+  const diff = course_par != null ? score - course_par : score - 100;
+  return { diff, label: course_par != null ? 'vs par' : 'vs 100' };
+}
+
+function formatDate(iso) {
+  const [y, m, d] = iso.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${parseInt(d)} ${months[parseInt(m)-1]} ${y}`;
+}
+
+function renderVsPar(diff, label) {
+  if (diff == null) return '';
+  const cls = diff < 0 ? 'under' : diff > 0 ? 'over' : 'even';
+  const sign = diff > 0 ? '+' : '';
+  return `<span class="vs-par ${cls}">${sign}${diff} ${label}</span>`;
+}
+
+function renderCard(s) {
+  const vp = s.type === 'round' ? vsPar(s.score, s.course_par) : null;
+  const noteExcerpt = s.note ? s.note.slice(0, 100) + (s.note.length > 100 ? '…' : '') : '';
+
+  return `
+    <div class="card session-card" id="card-${s.id}">
+      <div>
+        <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem;">
+          <span class="badge badge-${s.type}">${s.type}</span>
+          <span class="meta">${formatDate(s.date)}</span>
+          <span class="stars" title="${s.rating}/5">${stars(s.rating)}</span>
+        </div>
+        <div class="venue">${s.venue_name || 'Unknown venue'}</div>
+        ${noteExcerpt ? `<div class="note-excerpt">${noteExcerpt}</div>` : ''}
+        ${s.ai_summary ? `<div class="ai-summary" style="margin-top:.75rem;">${s.ai_summary.slice(0,200)}${s.ai_summary.length>200?'…':''}</div>` : ''}
+      </div>
+      <div style="text-align:right;">
+        ${s.type === 'round' && s.score != null ? `<div class="score-badge">${s.score}</div>` : ''}
+        ${vp ? renderVsPar(vp.diff, vp.label) : ''}
+        <div class="actions" style="margin-top:.75rem;">
+          <a href="/add-session.html?id=${s.id}" class="btn btn-sm btn-secondary">Edit</a>
+          <button class="btn btn-sm btn-danger" onclick="deleteSession(${s.id})">Delete</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+async function load() {
+  const url = currentFilter === 'all' ? '/api/sessions' : `/api/sessions?type=${currentFilter}`;
+  const sessions = await fetch(url).then(r => r.json());
+  const el = document.getElementById('sessions-list');
+  if (sessions.length === 0) {
+    el.innerHTML = `<div class="empty"><p>No sessions yet.</p><a href="/add-session.html" class="btn btn-primary">Add your first session</a></div>`;
+  } else {
+    el.innerHTML = sessions.map(renderCard).join('');
+  }
+}
+
+async function deleteSession(id) {
+  if (!confirm('Delete this session?')) return;
+  await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
+  document.getElementById(`card-${id}`)?.remove();
+  if (!document.querySelector('.card')) load(); // show empty state
+}
+
+document.querySelectorAll('.toggle-group button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.toggle-group button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    load();
+  });
+});
+
+load();

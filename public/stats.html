@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golf Blog — My Stats</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">⛳ Golf Blog</a>
+    <a href="/">History</a>
+    <a href="/add-session.html">Add Session</a>
+    <a href="/scorecard.html">Scorecards</a>
+    <a href="/stats.html" class="active">My Stats</a>
+  </nav>
+  <div class="container">
+    <div class="page-header">
+      <h1>My Stats</h1>
+    </div>
+
+    <div class="stats-grid" id="stats-grid">
+      <div class="stat-card"><div class="label">Rounds Played</div><div class="value" id="stat-rounds">—</div></div>
+      <div class="stat-card"><div class="label">Range Sessions</div><div class="value" id="stat-range">—</div></div>
+      <div class="stat-card"><div class="label">Best Score</div><div class="value" id="stat-best">—</div></div>
+      <div class="stat-card"><div class="label">Average Score</div><div class="value" id="stat-avg">—</div></div>
+      <div class="stat-card"><div class="label">Avg vs Par/100</div><div class="value" id="stat-vspar">—</div></div>
+      <div class="stat-card">
+        <div class="label">Scoring Trend</div>
+        <div class="value" id="stat-trend">—</div>
+        <div class="sub" id="stat-trend-sub"></div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-controls">
+        <strong style="font-size:.85rem;color:var(--gray-600);margin-right:.5rem;">Chart:</strong>
+        <div class="toggle-group">
+          <button class="active" data-mode="score">Score</button>
+          <button data-mode="vspar">vs Par</button>
+          <button data-mode="vs100">vs 100</button>
+        </div>
+      </div>
+      <canvas id="progress-chart" height="120"></canvas>
+      <div class="empty" id="chart-empty" style="display:none;padding:2rem 0;">
+        <p>Not enough round data to show a chart.</p>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/js/stats.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golf Blog — Scorecards</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">⛳ Golf Blog</a>
+    <a href="/">History</a>
+    <a href="/add-session.html">Add Session</a>
+    <a href="/scorecard.html" class="active">Scorecards</a>
+    <a href="/stats.html">My Stats</a>
+  </nav>
+  <div class="container">
+    <div class="page-header">
+      <h1>Scorecards</h1>
+    </div>
+    <div class="two-col">
+      <!-- Venue list -->
+      <div class="panel" style="align-self:start;">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;">
+          <strong style="font-size:.95rem;">Venues</strong>
+          <button class="btn btn-sm btn-primary" style="margin-left:auto;" id="add-venue-btn">+ Add</button>
+        </div>
+        <ul class="venue-list" id="venue-list"></ul>
+        <div class="empty" id="no-venues" style="display:none;padding:1.5rem 0;">
+          <p style="font-size:.9rem;">No venues yet.</p>
+        </div>
+      </div>
+
+      <!-- Scorecard editor -->
+      <div class="panel" id="scorecard-panel" style="display:none;">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;">
+          <h2 id="venue-title" style="font-size:1.1rem;font-weight:700;"></h2>
+          <span id="markdown-link-wrap" style="margin-left:.5rem;"></span>
+          <span class="spacer"></span>
+          <span id="par-total-label" style="font-size:.85rem;color:var(--gray-600);"></span>
+        </div>
+        <p style="font-size:.82rem;color:var(--gray-400);margin-bottom:1rem;">Yellow tee scorecard — edit any cell, then Save.</p>
+        <table class="scorecard-table" id="scorecard-table">
+          <thead>
+            <tr>
+              <th>Hole</th>
+              <th>Yards</th>
+              <th>Par</th>
+              <th>S.I.</th>
+            </tr>
+          </thead>
+          <tbody id="scorecard-body"></tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td>OUT</td>
+              <td id="out-yards">—</td>
+              <td id="out-par">—</td>
+              <td></td>
+            </tr>
+            <tr class="total-row">
+              <td>IN</td>
+              <td id="in-yards">—</td>
+              <td id="in-par">—</td>
+              <td></td>
+            </tr>
+            <tr class="total-row" style="background:var(--green-pale);">
+              <td><strong>Total</strong></td>
+              <td id="total-yards"><strong>—</strong></td>
+              <td id="total-par"><strong>—</strong></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div style="margin-top:1.25rem;display:flex;gap:.75rem;">
+          <button class="btn btn-primary" id="save-scorecard-btn">Save Scorecard</button>
+          <span id="save-status" style="align-self:center;font-size:.85rem;color:var(--green);display:none;">Saved ✓</span>
+        </div>
+      </div>
+
+      <div class="panel" id="empty-panel" style="display:flex;align-items:center;justify-content:center;color:var(--gray-400);">
+        Select a venue to edit its scorecard
+      </div>
+    </div>
+  </div>
+  <script src="/js/scorecard.js"></script>
+</body>
+</html>
