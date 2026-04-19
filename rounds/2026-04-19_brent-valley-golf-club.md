@@ -26,4 +26,8 @@ Overall a really encouraging round. Breaking 100 is close.
 
 ## AI Summary
 
-_Generating…_
+Something clicked today out at Brent Valley. I shot 103, which on paper doesn't look like much, but the back nine told a different story — 50 shots, technically a par round by the hundred benchmark, and it felt like one too. The consistency back there was something I haven't felt before: no blow-up holes, hitting my expected score on four of the nine, staying within a shot or two on the rest. My putting was the real engine behind it. I've been building trust in the SIK mallet and the DLT technology, and today it paid off — I was rolling putts with genuine confidence, reading lines, holding my finish. It's becoming something I look forward to on the green rather than dread.
+
+The short game was quietly impressive too. I've been leaning more on my pitching wedge for those 50–80 yard approaches where I used to resort to a toed-down chip, and today I committed to it properly — and it worked. I got onto a couple of greens and had some real looks. Hole 13 was a highlight: that par three with the gap and the tree lurking right in front of the tee box is one that used to eat me alive, and I hit it clean, walking away with only a bogey. Hole 8 was the lone actual par — a scrappy one, a tee shot that found rough between two trees, but a calm approach and a confident putt sealed it. That's the kind of golf I want to be playing more of.
+
+The honest thing holding me back from breaking 100 today was the tee game. I stuck to 4 and 5 iron off the tee to keep it in play and that mostly worked, but I kept chunking shots — safe but short, playing catch-up on hole after hole. The hybrid, when I catch it well, is a real weapon, and that's where the work goes next: a range session to find the 4 iron swing again and get some reps in with the hybrid. Breaking 100 doesn't feel like a question of whether anymore. Today it felt inevitable.
