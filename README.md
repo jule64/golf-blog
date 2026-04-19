@@ -2,6 +2,8 @@
 
 A personal golf round tracker and blog. Log rounds and practice sessions, track progress over time, and get AI-generated coaching summaries powered by Claude.
 
+> 🤖 This app was built 100% with [Claude Code](https://claude.ai/code).
+
 ## Features
 
 - **Log rounds and range sessions** — date, venue, score, rating, notes
