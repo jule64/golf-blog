@@ -17,6 +17,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/sessions', sessionRoutes);
 app.use('/api/venues', scorecardRoutes);
 app.use('/api/stats', statsRoutes);
+app.get('/api/config', (req, res) => res.json({ aiEnabled: process.env.AI_SUMMARIES === 'true' }));
 
 // Fallback: serve index.html for all non-API routes
 app.get('*', (req, res) => {

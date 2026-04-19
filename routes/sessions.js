@@ -69,12 +69,14 @@ router.post('/', async (req, res) => {
   const scorecard = getScorecard(db, resolvedVenueId);
   const venue = resolvedVenueId ? db.prepare('SELECT * FROM venues WHERE id = ?').get(resolvedVenueId) : null;
 
-  // Generate AI summary
+  // Generate AI summary (set AI_SUMMARIES=true in .env to enable)
   let aiSummary = null;
-  try {
-    aiSummary = await generateSessionSummary(session, venue, session.holes, scorecard);
-  } catch (e) {
-    console.error('Claude summary failed:', e.message);
+  if (process.env.AI_SUMMARIES === 'true') {
+    try {
+      aiSummary = await generateSessionSummary(session, venue, session.holes, scorecard);
+    } catch (e) {
+      console.error('Claude summary failed:', e.message);
+    }
   }
 
   if (aiSummary) {
@@ -135,7 +137,7 @@ router.put('/:id', async (req, res) => {
   const scorecard = getScorecard(db, resolvedVenueId);
   const venue = resolvedVenueId ? db.prepare('SELECT * FROM venues WHERE id = ?').get(resolvedVenueId) : null;
 
-  if (regenerate_ai) {
+  if (regenerate_ai && process.env.AI_SUMMARIES === 'true') {
     try {
       const aiSummary = await generateSessionSummary(session, venue, session.holes, scorecard);
       db.prepare('UPDATE sessions SET ai_summary = ?, updated_at = datetime(\'now\') WHERE id = ?').run(aiSummary, session.id);
@@ -164,6 +166,8 @@ router.delete('/:id', (req, res) => {
 });
 
 router.post('/:id/regenerate-summary', async (req, res) => {
+  if (process.env.AI_SUMMARIES !== 'true') return res.status(503).json({ error: 'AI summaries are disabled. Set AI_SUMMARIES=true in .env to enable.' });
+
   const db = getDB();
   const session = getSessionWithHoles(db, req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });

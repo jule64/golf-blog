@@ -1,4 +1,5 @@
 let currentFilter = 'all';
+let aiEnabled = false;
 
 function stars(n) {
   return '★'.repeat(n) + '☆'.repeat(5 - n);
@@ -39,7 +40,7 @@ function renderCard(s) {
         ${noteExcerpt ? `<div class="note-excerpt">${noteExcerpt}</div>` : ''}
         ${s.ai_summary
           ? `<div class="ai-summary" style="margin-top:.75rem;">${s.ai_summary.slice(0,200)}${s.ai_summary.length>200?'…':''}</div>`
-          : `<div style="margin-top:.75rem;"><button class="btn btn-sm btn-secondary" onclick="regenerateSummary(${s.id}, this)">✨ Generate AI summary</button></div>`
+          : aiEnabled ? `<div style="margin-top:.75rem;"><button class="btn btn-sm btn-secondary" onclick="regenerateSummary(${s.id}, this)">✨ Generate AI summary</button></div>` : ''
         }
       </div>
       <div style="text-align:right;">
@@ -96,4 +97,4 @@ document.querySelectorAll('.toggle-group button').forEach(btn => {
   });
 });
 
-load();
+fetch('/api/config').then(r => r.json()).then(c => { aiEnabled = c.aiEnabled; load(); });
