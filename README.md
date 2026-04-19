@@ -4,6 +4,8 @@ A personal golf round tracker and blog. Log rounds and practice sessions, track 
 
 > 🤖 This app was built 100% with [Claude Code](https://claude.ai/code).
 
+![Golf Blog screenshot](docs/screenshot.png)
+
 ## Features
 
 - **Log rounds and range sessions** — date, venue, score, rating, notes
