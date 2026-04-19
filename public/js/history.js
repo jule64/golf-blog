@@ -29,7 +29,7 @@ function renderCard(s) {
   const noteExcerpt = s.note ? s.note.slice(0, 100) + (s.note.length > 100 ? '…' : '') : '';
 
   return `
-    <div class="card session-card" id="card-${s.id}">
+    <div class="card session-card" id="card-${s.id}" onclick="cardClick(event, ${s.id})" style="cursor:pointer;">
       <div>
         <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem;">
           <span class="badge badge-${s.type}">${s.type}</span>
@@ -47,11 +47,16 @@ function renderCard(s) {
         ${s.type === 'round' && s.score != null ? `<div class="score-badge">${s.score}</div>` : ''}
         ${vp ? renderVsPar(vp.diff, vp.label) : ''}
         <div class="actions" style="margin-top:.75rem;">
-          <a href="/add-session.html?id=${s.id}" class="btn btn-sm btn-secondary">Edit</a>
-          <button class="btn btn-sm btn-danger" onclick="deleteSession(${s.id})">Delete</button>
+          <a href="/add-session.html?id=${s.id}" class="btn btn-sm btn-secondary" onclick="event.stopPropagation()">Edit</a>
+          <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteSession(${s.id})">Delete</button>
         </div>
       </div>
     </div>`;
+}
+
+function cardClick(event, id) {
+  if (event.target.closest('button, a')) return;
+  location.href = `/session.html?id=${id}`;
 }
 
 async function load() {

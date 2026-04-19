@@ -34,9 +34,9 @@ db/
   schema.sql               # Tables: venues, scorecard_holes, sessions, session_holes
   database.js              # getDB(), initDB()
 routes/
-  sessions.js              # CRUD + /regenerate-summary
-  scorecards.js            # Venue + hole CRUD, writes scorecard markdown
-  stats.js                 # /summary and /chart endpoints
+  sessions.js              # CRUD + /regenerate-summary — mounted at /api/sessions
+  scorecards.js            # Venue + hole CRUD, writes scorecard markdown — mounted at /api/venues
+  stats.js                 # /summary and /chart endpoints — mounted at /api/stats
 services/
   markdownService.js       # writeSessionMarkdown(), writeScorecardMarkdown(), delete helpers
   claudeService.js         # generateSessionSummary() — first-person blog entry prompt
@@ -45,7 +45,8 @@ services/
 rounds/                    # One .md file per session (YYYY-MM-DD_venue-slug.md)
 scorecards/                # One .md file per venue (venue-slug.md)
 public/
-  index.html + js/history.js        # Round history, filter, delete, regenerate summary
+  index.html + js/history.js        # Round history, filter; cards are clickable → session detail
+  session.html + js/session.js      # Full session detail: notes, AI blog entry, hole-by-hole table
   add-session.html + js/add-session.js  # Add/edit session, hole grid, star rating
   scorecard.html + js/scorecard.js  # Venue list + inline scorecard editor
   stats.html + js/stats.js          # Stats cards + Chart.js progress chart

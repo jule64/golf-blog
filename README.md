@@ -8,7 +8,8 @@ A personal golf round tracker and blog. Log rounds and practice sessions, track 
 
 - **Log rounds and range sessions** — date, venue, score, rating, notes
 - **Hole-by-hole scoring** — optional per-hole entry when a venue scorecard is loaded
-- **AI coaching summaries** — Claude analyses each session and writes a brief coaching note
+- **Session detail view** — click any history card to see the full session: complete notes, full AI blog entry, and a hole-by-hole score table with par, S.I., and per-hole +/− diff
+- **AI blog entries** — Claude ghostwrites a first-person blog entry for each session, bringing the round to life in your voice
 - **Score tracking** — vs par (when available) or vs 100 as a default handicap baseline
 - **Progress chart** — score over time, switchable between raw score / vs par / vs 100
 - **My Stats** — rounds played, best score, average score, average vs par, scoring trend
@@ -49,9 +50,13 @@ Go to **Add Session**. Select a venue if you have a scorecard loaded — this un
 
 Each session is saved as `rounds/YYYY-MM-DD_<venue>.md` with front-matter, your notes, the AI summary, and a full hole breakdown.
 
+### Viewing a session
+
+Click any history card to open the full session detail: your complete notes, the AI-written blog entry, and a hole-by-hole breakdown comparing your scores to par.
+
 ### Editing or deleting
 
-Use the **Edit** / **Delete** buttons on any history card. Editing a session regenerates the AI summary and rewrites the markdown file.
+Use the **Edit** / **Delete** buttons on any history card or session detail page. Editing a session regenerates the AI summary and rewrites the markdown file.
 
 ## File structure
 

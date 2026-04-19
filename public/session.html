@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golf Blog — Session</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .session-header { margin-bottom: 1.5rem; }
+    .session-header h1 { font-size: 1.5rem; font-weight: 700; margin: .4rem 0 .3rem; }
+    .session-meta-row { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+    .score-block { display: flex; align-items: baseline; gap: .5rem; margin: .75rem 0; }
+    .score-block .big-score { font-size: 2.5rem; font-weight: 800; line-height: 1; }
+
+    .section { margin-top: 1.5rem; }
+    .section-label { font-size: .78rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--gray-400); margin-bottom: .6rem; }
+
+    .note-text { color: var(--gray-600); line-height: 1.7; white-space: pre-wrap; }
+
+    .ai-summary-full { background: var(--gray-50); border-left: 3px solid var(--green-light); padding: 1rem 1.25rem; border-radius: 0 var(--radius) var(--radius) 0; line-height: 1.75; color: var(--gray-800); white-space: pre-wrap; }
+
+    .holes-table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .holes-table th { background: var(--green); color: white; padding: .45rem .6rem; text-align: center; font-weight: 600; }
+    .holes-table td { border-bottom: 1px solid var(--gray-100); padding: .4rem .6rem; text-align: center; }
+    .holes-table tr:hover td { background: var(--gray-50); }
+    .holes-table .total-row td { font-weight: 700; background: var(--gray-50); }
+    .holes-table .sep-row td { background: var(--gray-100); font-weight: 700; font-size: .82rem; color: var(--gray-600); }
+    td.diff-under { color: var(--green); font-weight: 600; }
+    td.diff-over { color: var(--red); font-weight: 600; }
+    td.diff-even { color: var(--gray-400); }
+
+    .action-bar { display: flex; gap: .6rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/" class="brand">⛳ Golf Blog</a>
+    <a href="/">History</a>
+    <a href="/add-session.html">Add Session</a>
+    <a href="/scorecard.html">Scorecards</a>
+    <a href="/stats.html">My Stats</a>
+  </nav>
+  <div class="container">
+    <div id="content"><p style="color:var(--gray-400);padding:2rem 0;">Loading…</p></div>
+  </div>
+  <script src="/js/session.js"></script>
+</body>
+</html>

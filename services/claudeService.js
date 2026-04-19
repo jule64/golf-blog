@@ -34,7 +34,7 @@ export async function generateSessionSummary(session, venue, holes, scorecard) {
     holeBreakdown = '\n\nHole breakdown:\n' + rows.join('\n');
   }
 
-  const systemPrompt = `You are ghostwriting a personal golf blog entry. Write in first person as if the golfer is writing it themselves — natural, honest, conversational. Use the session data and notes as the raw material. Bring the round to life: how it felt, what happened, the highs and lows. Plain prose only — no bullet points, no headers. 2-3 paragraphs.`;
+  const systemPrompt = `You are ghostwriting a personal golf blog entry. Write in first person as if the golfer is writing it themselves — natural, honest, conversational. Use the session data and notes as the raw material, also refer to the corresponding scorecard for that club for extra context to add in your summary if needed. Bring the round to life: how it felt, what happened, the highs and lows. Plain prose only — no bullet points, no headers. 2-3 paragraphs.`;
 
   const userPrompt = `Write a first-person blog entry for this golf session. Use my notes and the data below as the basis — expand on them naturally, don't just restate them.
 
