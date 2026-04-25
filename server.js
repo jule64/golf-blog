@@ -3,7 +3,7 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { initDB } from './db/database.js';
-import { syncScorecards } from './services/syncService.js';
+import { syncScorecards, syncSessions } from './services/syncService.js';
 import sessionRoutes from './routes/sessions.js';
 import scorecardRoutes from './routes/scorecards.js';
 import statsRoutes from './routes/stats.js';
@@ -26,6 +26,7 @@ app.get('*', (req, res) => {
 
 initDB();
 syncScorecards();
+syncSessions();
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Golf tracker running at http://localhost:${port}`));

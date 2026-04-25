@@ -2,6 +2,7 @@ const id = new URLSearchParams(location.search).get('id');
 let aiEnabled = false;
 
 function stars(n) {
+  if (!n) return '';
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 }
 
@@ -127,7 +128,7 @@ function render(s, scorecardHoles) {
       <div class="session-meta-row">
         <span class="badge badge-${s.type}">${s.type}</span>
         <span class="meta">${formatDate(s.date)}</span>
-        <span class="stars" title="${s.rating}/5">${stars(s.rating)}</span>
+        ${s.rating ? `<span class="stars" title="${s.rating}/5">${stars(s.rating)}</span>` : ''}
       </div>
       <h1>${s.venue_name || 'Unknown venue'}</h1>
       ${s.type === 'round' && s.score != null ? `

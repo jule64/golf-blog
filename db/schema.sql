@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   venue_name    TEXT,
   score         INTEGER,
   course_par    INTEGER,
-  rating        INTEGER NOT NULL CHECK(rating BETWEEN 1 AND 5),
+  rating        INTEGER CHECK(rating IS NULL OR rating BETWEEN 1 AND 5),
   note          TEXT,
   ai_summary    TEXT,
   markdown_file TEXT,

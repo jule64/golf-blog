@@ -5,6 +5,7 @@ import { getDB } from '../db/database.js';
 
 const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 const scorecardsDir = path.join(rootDir, 'scorecards');
+const roundsDir = path.join(rootDir, 'rounds');
 
 function parseFrontMatter(text) {
   const match = text.match(/^---\n([\s\S]*?)\n---/);
@@ -31,6 +32,65 @@ function parseHoleRows(text) {
     });
   }
   return holes;
+}
+
+function extractSection(text, heading) {
+  const re = new RegExp(`## ${heading}[ \\t]*\\n([\\s\\S]*?)(?=\\n## |$)`);
+  const m = text.match(re);
+  return m ? m[1].trim() : null;
+}
+
+// DD/MM/YYYY → YYYY-MM-DD
+function parseDateFm(str) {
+  const m = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (!m) return null;
+  return `${m[3]}-${m[2]}-${m[1]}`;
+}
+
+export function syncSessions() {
+  if (!existsSync(roundsDir)) return;
+
+  const db = getDB();
+  const files = readdirSync(roundsDir).filter(f => f.endsWith('.md'));
+
+  for (const file of files) {
+    const relPath = `rounds/${file}`;
+    const existing = db.prepare('SELECT id FROM sessions WHERE markdown_file = ?').get(relPath);
+    if (existing) continue;
+
+    const text = readFileSync(path.join(roundsDir, file), 'utf8');
+    const fm = parseFrontMatter(text);
+
+    const date = parseDateFm(fm.date);
+    if (!date) continue;
+
+    const type = fm.type === 'range' ? 'range' : 'round';
+    const venueName = fm.venue || null;
+    const score = fm.score && fm.score !== '' ? parseInt(fm.score) : null;
+    const coursePar = fm.par && fm.par !== '' ? parseInt(fm.par) : null;
+    const ratingMatch = fm.rating ? fm.rating.match(/^([1-5])/) : null;
+    const rating = ratingMatch ? parseInt(ratingMatch[1]) : null;
+    const note = extractSection(text, 'My Notes');
+    const aiSummary = extractSection(text, 'AI Summary') || null;
+
+    let venueId = null;
+    if (venueName) {
+      let venue = db.prepare('SELECT id FROM venues WHERE name = ?').get(venueName);
+      if (!venue) {
+        const r = db.prepare('INSERT INTO venues (name) VALUES (?)').run(venueName);
+        venueId = r.lastInsertRowid;
+      } else {
+        venueId = venue.id;
+      }
+    }
+
+    db.prepare(`
+      INSERT INTO sessions (type, date, venue_id, venue_name, score, course_par, rating, note, ai_summary, markdown_file)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `).run(type, date, venueId, venueName, score, coursePar, rating, note || null, aiSummary, relPath);
+
+    console.log(`Imported session from ${relPath}`);
+  }
 }
 
 export function syncScorecards() {

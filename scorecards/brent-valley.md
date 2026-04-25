@@ -1,6 +1,6 @@
 ---
 id: 1
-name: Brent Valley Golf Club
+name: Brent Valley
 par: 72
 yards: 0
 tee: yellow

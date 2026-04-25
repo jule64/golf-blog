@@ -2,6 +2,7 @@ let currentFilter = 'all';
 let aiEnabled = false;
 
 function stars(n) {
+  if (!n) return '';
   return '★'.repeat(n) + '☆'.repeat(5 - n);
 }
 
@@ -34,7 +35,7 @@ function renderCard(s) {
         <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.3rem;">
           <span class="badge badge-${s.type}">${s.type}</span>
           <span class="meta">${formatDate(s.date)}</span>
-          <span class="stars" title="${s.rating}/5">${stars(s.rating)}</span>
+          ${s.rating ? `<span class="stars" title="${s.rating}/5">${stars(s.rating)}</span>` : ''}
         </div>
         <div class="venue">${s.venue_name || 'Unknown venue'}</div>
         ${noteExcerpt ? `<div class="note-excerpt">${noteExcerpt}</div>` : ''}
