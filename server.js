@@ -2,8 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path';
-import { initDB } from './db/database.js';
-import { syncScorecards, syncSessions } from './services/syncService.js';
+import { initStore } from './services/store.js';
 import sessionRoutes from './routes/sessions.js';
 import scorecardRoutes from './routes/scorecards.js';
 import statsRoutes from './routes/stats.js';
@@ -19,14 +18,11 @@ app.use('/api/venues', scorecardRoutes);
 app.use('/api/stats', statsRoutes);
 app.get('/api/config', (req, res) => res.json({ aiEnabled: process.env.AI_SUMMARIES === 'true' }));
 
-// Fallback: serve index.html for all non-API routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-initDB();
-syncScorecards();
-syncSessions();
+initStore();
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => console.log(`Golf tracker running at http://localhost:${port}`));

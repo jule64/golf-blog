@@ -1,119 +1,83 @@
 import { Router } from 'express';
-import { getDB } from '../db/database.js';
-import { writeSessionMarkdown, deleteSessionMarkdown, sessionMarkdownPath } from '../services/markdownService.js';
+import {
+  getSessions, getSession, createSession, updateSession, deleteSession, getVenue,
+} from '../services/store.js';
+import { writeSessionMarkdown, deleteSessionMarkdown } from '../services/markdownService.js';
 import { generateSessionSummary } from '../services/claudeService.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 const router = Router();
-const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
-
-function getSessionWithHoles(db, id) {
-  const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(id);
-  if (!session) return null;
-  const holes = db.prepare('SELECT * FROM session_holes WHERE session_id = ? ORDER BY hole').all(id);
-  return { ...session, holes };
-}
-
-function getScorecard(db, venue_id) {
-  if (!venue_id) return [];
-  return db.prepare('SELECT * FROM scorecard_holes WHERE venue_id = ? ORDER BY hole').all(venue_id);
-}
 
 router.get('/', (req, res) => {
-  const db = getDB();
-  let query = 'SELECT * FROM sessions';
-  const params = [];
-  if (req.query.type) { query += ' WHERE type = ?'; params.push(req.query.type); }
-  query += ' ORDER BY date DESC, created_at DESC';
-  const sessions = db.prepare(query).all(...params);
-  res.json(sessions);
+  res.json(getSessions(req.query.type));
 });
 
 router.get('/:id', (req, res) => {
-  const db = getDB();
-  const session = getSessionWithHoles(db, req.params.id);
+  const session = getSession(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   res.json(session);
 });
 
 router.post('/', async (req, res) => {
-  const db = getDB();
   const { type, date, venue_id, venue_name, score, course_par, rating, note, holes } = req.body;
-
   if (!type || !date || !rating) return res.status(400).json({ error: 'type, date, rating are required' });
 
-  // Resolve venue name
   let resolvedVenueName = venue_name;
-  let resolvedVenueId = venue_id || null;
-  if (venue_id) {
-    const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(venue_id);
+  let resolvedVenueId = venue_id ? Number(venue_id) : null;
+  if (resolvedVenueId) {
+    const venue = getVenue(resolvedVenueId);
     if (venue) resolvedVenueName = venue.name;
   }
 
-  const result = db.prepare(`
-    INSERT INTO sessions (type, date, venue_id, venue_name, score, course_par, rating, note)
-    VALUES (@type, @date, @venue_id, @venue_name, @score, @course_par, @rating, @note)
-  `).run({ type, date, venue_id: resolvedVenueId, venue_name: resolvedVenueName, score: score || null, course_par: course_par || null, rating, note: note || null });
+  const sessionHoles = Array.isArray(holes) ? holes : [];
 
-  const sessionId = result.lastInsertRowid;
+  let session = createSession({
+    type,
+    date,
+    venue_id: resolvedVenueId,
+    venue_name: resolvedVenueName,
+    score: score || null,
+    course_par: course_par || null,
+    rating,
+    note: note || null,
+    ai_summary: null,
+    markdown_file: null,
+    holes: sessionHoles,
+  });
 
-  // Insert holes
-  if (Array.isArray(holes) && holes.length > 0) {
-    const insertHole = db.prepare('INSERT OR REPLACE INTO session_holes (session_id, hole, strokes) VALUES (?, ?, ?)');
-    const insertAll = db.transaction((hs) => { for (const h of hs) insertHole.run(sessionId, h.hole, h.strokes); });
-    insertAll(holes);
-  }
+  const scorecard = resolvedVenueId ? (getVenue(resolvedVenueId)?.holes ?? []) : [];
+  const venue = resolvedVenueId ? getVenue(resolvedVenueId) : null;
 
-  let session = getSessionWithHoles(db, sessionId);
-  const scorecard = getScorecard(db, resolvedVenueId);
-  const venue = resolvedVenueId ? db.prepare('SELECT * FROM venues WHERE id = ?').get(resolvedVenueId) : null;
-
-  // Generate AI summary (set AI_SUMMARIES=true in .env to enable)
-  let aiSummary = null;
   if (process.env.AI_SUMMARIES === 'true') {
     try {
-      aiSummary = await generateSessionSummary(session, venue, session.holes, scorecard);
+      const aiSummary = await generateSessionSummary(session, venue, sessionHoles, scorecard);
+      session = updateSession(session.id, { ai_summary: aiSummary });
     } catch (e) {
       console.error('Claude summary failed:', e.message);
     }
   }
 
-  if (aiSummary) {
-    db.prepare('UPDATE sessions SET ai_summary = ?, updated_at = datetime(\'now\') WHERE id = ?').run(aiSummary, sessionId);
-    session = getSessionWithHoles(db, sessionId);
-  }
-
-  // Write markdown
-  const relPath = writeSessionMarkdown(session, session.holes, scorecard);
-  db.prepare('UPDATE sessions SET markdown_file = ?, updated_at = datetime(\'now\') WHERE id = ?').run(relPath, sessionId);
-  session.markdown_file = relPath;
+  const relPath = writeSessionMarkdown(session, sessionHoles, scorecard);
+  session = updateSession(session.id, { markdown_file: relPath });
 
   res.status(201).json(session);
 });
 
 router.put('/:id', async (req, res) => {
-  const db = getDB();
-  const existing = getSessionWithHoles(db, req.params.id);
+  const existing = getSession(req.params.id);
   if (!existing) return res.status(404).json({ error: 'Session not found' });
 
   const { type, date, venue_id, venue_name, score, course_par, rating, note, holes, regenerate_ai } = req.body;
 
-  let resolvedVenueName = venue_name || existing.venue_name;
-  let resolvedVenueId = venue_id !== undefined ? (venue_id || null) : existing.venue_id;
+  let resolvedVenueName = venue_name !== undefined ? venue_name : existing.venue_name;
+  let resolvedVenueId = venue_id !== undefined ? (venue_id ? Number(venue_id) : null) : existing.venue_id;
   if (resolvedVenueId) {
-    const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(resolvedVenueId);
+    const venue = getVenue(resolvedVenueId);
     if (venue) resolvedVenueName = venue.name;
   }
 
-  db.prepare(`
-    UPDATE sessions SET
-      type = @type, date = @date, venue_id = @venue_id, venue_name = @venue_name,
-      score = @score, course_par = @course_par, rating = @rating, note = @note,
-      updated_at = datetime('now')
-    WHERE id = @id
-  `).run({
-    id: existing.id,
+  const sessionHoles = Array.isArray(holes) ? holes : existing.holes;
+
+  let session = updateSession(existing.id, {
     type: type || existing.type,
     date: date || existing.date,
     venue_id: resolvedVenueId,
@@ -122,65 +86,52 @@ router.put('/:id', async (req, res) => {
     course_par: course_par !== undefined ? (course_par || null) : existing.course_par,
     rating: rating || existing.rating,
     note: note !== undefined ? (note || null) : existing.note,
+    holes: sessionHoles,
   });
 
-  if (Array.isArray(holes)) {
-    db.prepare('DELETE FROM session_holes WHERE session_id = ?').run(existing.id);
-    if (holes.length > 0) {
-      const insertHole = db.prepare('INSERT INTO session_holes (session_id, hole, strokes) VALUES (?, ?, ?)');
-      const insertAll = db.transaction((hs) => { for (const h of hs) insertHole.run(existing.id, h.hole, h.strokes); });
-      insertAll(holes);
-    }
-  }
-
-  let session = getSessionWithHoles(db, existing.id);
-  const scorecard = getScorecard(db, resolvedVenueId);
-  const venue = resolvedVenueId ? db.prepare('SELECT * FROM venues WHERE id = ?').get(resolvedVenueId) : null;
+  const scorecard = resolvedVenueId ? (getVenue(resolvedVenueId)?.holes ?? []) : [];
+  const venue = resolvedVenueId ? getVenue(resolvedVenueId) : null;
 
   if (regenerate_ai && process.env.AI_SUMMARIES === 'true') {
     try {
-      const aiSummary = await generateSessionSummary(session, venue, session.holes, scorecard);
-      db.prepare('UPDATE sessions SET ai_summary = ?, updated_at = datetime(\'now\') WHERE id = ?').run(aiSummary, session.id);
-      session = getSessionWithHoles(db, session.id);
+      const aiSummary = await generateSessionSummary(session, venue, sessionHoles, scorecard);
+      session = updateSession(session.id, { ai_summary: aiSummary });
     } catch (e) {
       console.error('Claude summary failed:', e.message);
     }
   }
 
-  // Delete old markdown if path changed (venue name change)
   deleteSessionMarkdown(existing.markdown_file);
-  const relPath = writeSessionMarkdown(session, session.holes, scorecard);
-  db.prepare('UPDATE sessions SET markdown_file = ?, updated_at = datetime(\'now\') WHERE id = ?').run(relPath, session.id);
-  session.markdown_file = relPath;
+  const relPath = writeSessionMarkdown(session, sessionHoles, scorecard);
+  session = updateSession(session.id, { markdown_file: relPath });
 
   res.json(session);
 });
 
 router.delete('/:id', (req, res) => {
-  const db = getDB();
-  const session = db.prepare('SELECT * FROM sessions WHERE id = ?').get(req.params.id);
+  const session = getSession(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
   deleteSessionMarkdown(session.markdown_file);
-  db.prepare('DELETE FROM sessions WHERE id = ?').run(session.id);
+  deleteSession(session.id);
   res.json({ ok: true });
 });
 
 router.post('/:id/regenerate-summary', async (req, res) => {
-  if (process.env.AI_SUMMARIES !== 'true') return res.status(503).json({ error: 'AI summaries are disabled. Set AI_SUMMARIES=true in .env to enable.' });
+  if (process.env.AI_SUMMARIES !== 'true') {
+    return res.status(503).json({ error: 'AI summaries are disabled. Set AI_SUMMARIES=true in .env to enable.' });
+  }
 
-  const db = getDB();
-  const session = getSessionWithHoles(db, req.params.id);
+  const session = getSession(req.params.id);
   if (!session) return res.status(404).json({ error: 'Session not found' });
 
-  const scorecard = getScorecard(db, session.venue_id);
-  const venue = session.venue_id ? db.prepare('SELECT * FROM venues WHERE id = ?').get(session.venue_id) : null;
+  const scorecard = session.venue_id ? (getVenue(session.venue_id)?.holes ?? []) : [];
+  const venue = session.venue_id ? getVenue(session.venue_id) : null;
 
   try {
     const aiSummary = await generateSessionSummary(session, venue, session.holes, scorecard);
-    db.prepare('UPDATE sessions SET ai_summary = ?, updated_at = datetime(\'now\') WHERE id = ?').run(aiSummary, session.id);
-    const updated = getSessionWithHoles(db, session.id);
+    let updated = updateSession(session.id, { ai_summary: aiSummary });
     const relPath = writeSessionMarkdown(updated, updated.holes, scorecard);
-    db.prepare('UPDATE sessions SET markdown_file = ? WHERE id = ?').run(relPath, session.id);
+    updateSession(session.id, { markdown_file: relPath });
     res.json({ ai_summary: aiSummary });
   } catch (e) {
     res.status(500).json({ error: e.message });

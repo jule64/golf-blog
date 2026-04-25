@@ -1,93 +1,77 @@
 import { Router } from 'express';
-import { getDB } from '../db/database.js';
-import { writeScorecardMarkdown, deleteScorecardMarkdown, scorecardMarkdownPath } from '../services/markdownService.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import {
+  getVenues, getVenue, createVenue, updateVenue, deleteVenueWithSessions, getSessions,
+} from '../services/store.js';
+import { writeScorecardMarkdown, deleteScorecardMarkdown, deleteSessionMarkdown } from '../services/markdownService.js';
 
 const router = Router();
-const rootDir = path.join(path.dirname(fileURLToPath(import.meta.url)), '..');
 
 router.get('/', (req, res) => {
-  const db = getDB();
-  const venues = db.prepare('SELECT * FROM venues ORDER BY name').all();
-  res.json(venues);
+  res.json(getVenues());
 });
 
 router.get('/:id', (req, res) => {
-  const db = getDB();
-  const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(req.params.id);
+  const venue = getVenue(req.params.id);
   if (!venue) return res.status(404).json({ error: 'Venue not found' });
-  const holes = db.prepare('SELECT * FROM scorecard_holes WHERE venue_id = ? ORDER BY hole').all(venue.id);
-  res.json({ ...venue, holes });
+  res.json(venue);
 });
 
 router.post('/', (req, res) => {
-  const db = getDB();
   const { name } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'name is required' });
-  try {
-    const result = db.prepare('INSERT INTO venues (name) VALUES (?)').run(name.trim());
-    const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(result.lastInsertRowid);
-    res.status(201).json(venue);
-  } catch (e) {
-    if (e.message.includes('UNIQUE')) return res.status(409).json({ error: 'Venue already exists' });
-    throw e;
-  }
+  const venue = createVenue(name.trim());
+  if (!venue) return res.status(409).json({ error: 'Venue already exists' });
+  // Write stub markdown so the venue persists across restarts
+  const relPath = writeScorecardMarkdown(venue, []);
+  const withPath = updateVenue(venue.id, { markdown_file: relPath });
+  res.status(201).json(withPath);
 });
 
 router.put('/:id', (req, res) => {
-  const db = getDB();
-  const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(req.params.id);
+  const venue = getVenue(req.params.id);
   if (!venue) return res.status(404).json({ error: 'Venue not found' });
   const { name } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'name is required' });
 
-  // Remove old markdown if name changes
   if (venue.markdown_file && name.trim() !== venue.name) {
     deleteScorecardMarkdown(venue.markdown_file);
   }
 
-  db.prepare('UPDATE venues SET name = ? WHERE id = ?').run(name.trim(), venue.id);
-  const updated = db.prepare('SELECT * FROM venues WHERE id = ?').get(venue.id);
+  const updated = updateVenue(venue.id, { name: name.trim(), markdown_file: null });
   res.json(updated);
 });
 
 router.post('/:id/holes', (req, res) => {
-  const db = getDB();
-  const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(req.params.id);
+  const venue = getVenue(req.params.id);
   if (!venue) return res.status(404).json({ error: 'Venue not found' });
 
   const { holes } = req.body;
   if (!Array.isArray(holes) || holes.length === 0) return res.status(400).json({ error: 'holes array required' });
 
-  const upsert = db.prepare(`
-    INSERT INTO scorecard_holes (venue_id, hole, yards, par, si)
-    VALUES (@venue_id, @hole, @yards, @par, @si)
-    ON CONFLICT(venue_id, hole) DO UPDATE SET yards=excluded.yards, par=excluded.par, si=excluded.si
-  `);
+  // Upsert holes into existing set
+  const holeMap = new Map(venue.holes.map(h => [h.hole, h]));
+  for (const h of holes) {
+    holeMap.set(h.hole, { hole: h.hole, yards: h.yards || null, par: h.par, si: h.si || null });
+  }
+  const allHoles = [...holeMap.values()].sort((a, b) => a.hole - b.hole);
 
-  const upsertMany = db.transaction((rows) => {
-    for (const h of rows) upsert.run({ venue_id: venue.id, hole: h.hole, yards: h.yards || null, par: h.par, si: h.si || null });
-  });
+  const withHoles = updateVenue(venue.id, { holes: allHoles });
+  const relPath = writeScorecardMarkdown(withHoles, allHoles);
+  const withPath = updateVenue(venue.id, { markdown_file: relPath });
 
-  upsertMany(holes);
-
-  const allHoles = db.prepare('SELECT * FROM scorecard_holes WHERE venue_id = ? ORDER BY hole').all(venue.id);
-
-  // Write scorecard markdown
-  const relPath = writeScorecardMarkdown(venue, allHoles);
-  db.prepare('UPDATE venues SET markdown_file = ? WHERE id = ?').run(relPath, venue.id);
-
-  res.json({ ...venue, markdown_file: relPath, holes: allHoles });
+  res.json(withPath);
 });
 
 router.delete('/:id', (req, res) => {
-  const db = getDB();
-  const venue = db.prepare('SELECT * FROM venues WHERE id = ?').get(req.params.id);
+  const venue = getVenue(req.params.id);
   if (!venue) return res.status(404).json({ error: 'Venue not found' });
 
+  // Delete session markdown files for sessions at this venue
+  const venueSessions = getSessions().filter(s => s.venue_id === venue.id);
+  for (const s of venueSessions) deleteSessionMarkdown(s.markdown_file);
+
   deleteScorecardMarkdown(venue.markdown_file);
-  db.prepare('DELETE FROM venues WHERE id = ?').run(venue.id);
+  deleteVenueWithSessions(venue.id);
   res.json({ ok: true });
 });
 
