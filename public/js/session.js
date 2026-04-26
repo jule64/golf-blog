@@ -208,15 +208,22 @@ function toggleSummary() {
 async function load() {
   if (!id) { document.getElementById('content').innerHTML = '<p>No session ID.</p>'; return; }
 
-  const [configRes, sessionRes] = await Promise.all([
+  const [configRes, sessionRes, statsRes] = await Promise.all([
     fetch('/api/config'),
-    fetch(`/api/sessions/${id}`)
+    fetch(`/api/sessions/${id}`),
+    fetch('/api/stats/summary'),
   ]);
 
   if (!sessionRes.ok) { document.getElementById('content').innerHTML = '<p>Session not found.</p>'; return; }
 
   const config = await configRes.json();
   aiEnabled = config.aiEnabled;
+
+  if (statsRes.ok) {
+    const stats = await statsRes.json();
+    const el = document.getElementById('session-counts');
+    if (el) el.innerHTML = `<span>Rounds: <strong>${stats.rounds_played}</strong></span><span>Range: <strong>${stats.range_sessions}</strong></span>`;
+  }
 
   const session = await sessionRes.json();
 

@@ -70,6 +70,10 @@ nav a:hover, nav a.active {
 /* Layout */
 .container { max-width: 900px; margin: 0 auto; padding: 2rem 1rem; }
 
+/* Session counts bar */
+.session-counts { display: flex; gap: 1.25rem; font-size: .78rem; color: var(--gray-400); margin-bottom: 1rem; }
+.session-counts span strong { color: var(--gray-600); font-weight: 600; }
+
 /* Cards */
 .card {
   background: white;

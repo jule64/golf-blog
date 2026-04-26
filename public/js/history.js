@@ -100,4 +100,16 @@ document.querySelectorAll('.toggle-group button').forEach(btn => {
   });
 });
 
-fetch('/api/config').then(r => r.json()).then(c => { aiEnabled = c.aiEnabled; load(); });
+function renderCounts(rounds, range) {
+  const el = document.getElementById('session-counts');
+  if (el) el.innerHTML = `<span>Rounds: <strong>${rounds}</strong></span><span>Range: <strong>${range}</strong></span>`;
+}
+
+Promise.all([
+  fetch('/api/config').then(r => r.json()),
+  fetch('/api/stats/summary').then(r => r.json()),
+]).then(([config, stats]) => {
+  aiEnabled = config.aiEnabled;
+  renderCounts(stats.rounds_played, stats.range_sessions);
+  load();
+});
