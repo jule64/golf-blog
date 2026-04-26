@@ -2,25 +2,28 @@
 
 A personal golf round tracker and blog. Log rounds and practice sessions, track progress over time, and get AI-generated coaching summaries powered by Claude.
 
-> 🤖 This app was built 100% with [Claude Code](https://claude.ai/code).
+> 🤖 This app was built 100% with [Claude Code](https://claude.ai/code)!
 
-![Golf Blog screenshot](docs/screenshot.png)
+![Golf Blog history page](docs/v1.1%20main%20page.png)
+
+![Golf Blog stats page](docs/v1.1%20stats%20page.png)
 
 ## Features
 
 - **Log rounds and range sessions** — date, venue, score, rating, notes
 - **Hole-by-hole scoring** — optional per-hole entry when a venue scorecard is loaded
-- **Session detail view** — click any history card to see the full session: complete notes, full AI blog entry, and a hole-by-hole score table with par, S.I., and per-hole +/− diff
-- **AI blog entries** — Claude ghostwrites a first-person blog entry for each session, bringing the round to life in your voice
+- **Session detail view** — click any history card to see the full session, AI blog entry, and a hole-by-hole score table with par, S.I., and per-hole +/− diff
+- **AI blog entries** — Claude ghostwrites a first-person blog entry for each session; history cards show an excerpt, session detail shows the full entry with a toggle to reveal your original notes
 - **Score tracking** — vs par (when available) or vs 100 as a default handicap baseline
 - **Progress chart** — score over time, switchable between raw score / vs par / vs 100
 - **My Stats** — rounds played, best score, average score, average vs par, scoring trend
-- **Markdown storage** — every session and scorecard is saved as a human-readable `.md` file alongside the database
+- **Session counts** — rounds and range session totals shown in the history filter tabs
+- **Markdown storage** — every session and scorecard is saved as a human-readable `.md` file; markdown is the source of truth, loaded into an in-memory store on startup
 
 ## Stack
 
 - **Backend** — Node.js + Express
-- **Database** — SQLite via better-sqlite3
+- **Storage** — In-memory store backed by markdown files in `rounds/` and `scorecards/`
 - **AI** — Anthropic Claude (`claude-sonnet-4-6`) via `@anthropic-ai/sdk`
 - **Frontend** — Vanilla JS, Chart.js
 
