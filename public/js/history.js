@@ -110,6 +110,6 @@ Promise.all([
   fetch('/api/stats/summary').then(r => r.json()),
 ]).then(([config, stats]) => {
   aiEnabled = config.aiEnabled;
-  renderCounts(stats.rounds_played, stats.range_sessions);
+  renderCounts(stats.total_rounds, stats.total_range);
   load();
 });

@@ -222,7 +222,7 @@ async function load() {
   if (statsRes.ok) {
     const stats = await statsRes.json();
     const el = document.getElementById('session-counts');
-    if (el) el.innerHTML = `<span>Rounds: <strong>${stats.rounds_played}</strong></span><span>Range: <strong>${stats.range_sessions}</strong></span>`;
+    if (el) el.innerHTML = `<span>Rounds: <strong>${stats.total_rounds}</strong></span><span>Range: <strong>${stats.total_range}</strong></span>`;
   }
 
   const session = await sessionRes.json();

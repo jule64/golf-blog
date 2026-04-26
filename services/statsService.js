@@ -7,7 +7,7 @@ export function calcVsPar(score, course_par) {
 export function calcSummary(sessions) {
   const rounds = sessions.filter(s => s.type === 'round' && s.score != null);
   if (rounds.length === 0) {
-    return { rounds_played: 0, range_sessions: sessions.filter(s => s.type === 'range').length, best_score: null, avg_score: null, avg_vs_par: null, trend: null };
+    return { rounds_played: 0, range_sessions: sessions.filter(s => s.type === 'range').length, total_rounds: sessions.filter(s => s.type === 'round').length, total_range: sessions.filter(s => s.type === 'range').length, best_score: null, avg_score: null, avg_vs_par: null, trend: null };
   }
 
   const scores = rounds.map(s => s.score);
@@ -29,6 +29,8 @@ export function calcSummary(sessions) {
   return {
     rounds_played: rounds.length,
     range_sessions: sessions.filter(s => s.type === 'range').length,
+    total_rounds: sessions.filter(s => s.type === 'round').length,
+    total_range: sessions.filter(s => s.type === 'range').length,
     best_score: Math.min(...scores),
     avg_score: Math.round(avg(scores) * 10) / 10,
     avg_vs_par: vsParVals.length ? Math.round(avg(vsParVals) * 10) / 10 : null,
