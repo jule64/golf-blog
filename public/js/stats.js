@@ -4,7 +4,7 @@ let chart = null;
 async function loadSummary() {
   const s = await fetch('/api/stats/summary').then(r => r.json());
 
-  document.getElementById('stat-rounds').textContent = s.rounds_played ?? '—';
+  document.getElementById('stat-rounds').textContent = s.total_rounds ?? '—';
   document.getElementById('stat-range').textContent = s.range_sessions ?? '—';
   document.getElementById('stat-best').textContent = s.best_score ?? '—';
   document.getElementById('stat-avg').textContent = s.avg_score ?? '—';
