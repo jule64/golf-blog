@@ -161,6 +161,18 @@ function render(s, scorecardHoles) {
     </div>` : ''}
 
     ${renderHolesTable(s.holes, scorecardHoles)}
+
+    ${s.type === 'round' ? `
+    <div class="section">
+      <div class="section-label">Quick scores</div>
+      <div class="card" style="padding:1rem;">
+        <textarea id="quick-scores-input" rows="2" style="width:100%;box-sizing:border-box;font-family:monospace;font-size:.9rem;padding:.5rem;border:1px solid var(--gray-200);border-radius:var(--radius);resize:vertical;" placeholder="H1=6, H2=5, H10=4…"></textarea>
+        <div style="display:flex;align-items:center;gap:.75rem;margin-top:.6rem;">
+          <button class="btn btn-sm" onclick="saveQuickScores()">Save scores</button>
+          <span id="quick-scores-status" style="font-size:.82rem;color:var(--gray-400);"></span>
+        </div>
+      </div>
+    </div>` : ''}
   `;
 }
 
@@ -184,6 +196,39 @@ async function regenerate() {
     alert('Failed: ' + error);
     btn.textContent = '↺ Regenerate summary';
     btn.disabled = false;
+  }
+}
+
+async function saveQuickScores() {
+  const input = document.getElementById('quick-scores-input').value.trim();
+  const status = document.getElementById('quick-scores-status');
+  if (!input) return;
+
+  const parsed = [];
+  for (const token of input.split(/[\s,]+/)) {
+    const m = token.match(/^[Hh](\d+)=(\d+)$/);
+    if (m) parsed.push({ hole: parseInt(m[1]), strokes: parseInt(m[2]) });
+  }
+  if (parsed.length === 0) { status.textContent = 'No valid scores found.'; return; }
+
+  const session = await fetch(`/api/sessions/${id}`).then(r => r.json());
+  const holeMap = new Map((session.holes || []).map(h => [h.hole, h]));
+  for (const h of parsed) holeMap.set(h.hole, { ...holeMap.get(h.hole), ...h });
+  const holes = [...holeMap.values()].sort((a, b) => a.hole - b.hole);
+
+  status.textContent = 'Saving…';
+  const res = await fetch(`/api/sessions/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ holes }),
+  });
+
+  if (res.ok) {
+    status.textContent = `${parsed.length} hole${parsed.length > 1 ? 's' : ''} saved.`;
+    document.getElementById('quick-scores-input').value = '';
+    load();
+  } else {
+    status.textContent = 'Save failed.';
   }
 }
 
