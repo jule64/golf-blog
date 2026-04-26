@@ -144,16 +144,20 @@ function render(s, scorecardHoles) {
       </div>
     </div>
 
-    ${s.note ? `
+    ${s.ai_summary ? `
+    <div class="section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;">
+        <div class="section-label" style="margin-bottom:0;" id="summary-label">AI Summary</div>
+        ${s.note ? `<button class="btn btn-sm btn-secondary" id="toggle-summary-btn" onclick="toggleSummary()">Show original notes</button>` : ''}
+      </div>
+      <div class="ai-summary-full" id="ai-summary-text">${s.ai_summary}</div>
+      ${s.note ? `<div class="card" id="note-text" style="display:none;"><p class="note-text">${s.note}</p></div>` : ''}
+    </div>` : ''}
+
+    ${s.note && !s.ai_summary ? `
     <div class="section">
       <div class="section-label">My Notes</div>
       <div class="card"><p class="note-text">${s.note}</p></div>
-    </div>` : ''}
-
-    ${s.ai_summary ? `
-    <div class="section">
-      <div class="section-label">AI Summary</div>
-      <div class="ai-summary-full" id="ai-summary-text">${s.ai_summary}</div>
     </div>` : ''}
 
     ${renderHolesTable(s.holes, scorecardHoles)}
@@ -187,6 +191,18 @@ async function deleteSession() {
   if (!confirm('Delete this session?')) return;
   await fetch(`/api/sessions/${id}`, { method: 'DELETE' });
   location.href = '/';
+}
+
+function toggleSummary() {
+  const aiEl = document.getElementById('ai-summary-text');
+  const noteEl = document.getElementById('note-text');
+  const btn = document.getElementById('toggle-summary-btn');
+  const label = document.getElementById('summary-label');
+  const showingAI = aiEl.style.display !== 'none';
+  aiEl.style.display = showingAI ? 'none' : '';
+  noteEl.style.display = showingAI ? '' : 'none';
+  btn.textContent = showingAI ? 'Show AI summary' : 'Show original notes';
+  label.textContent = showingAI ? 'My Notes' : 'AI Summary';
 }
 
 async function load() {

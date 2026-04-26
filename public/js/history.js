@@ -27,8 +27,6 @@ function renderVsPar(diff, label) {
 
 function renderCard(s) {
   const vp = s.type === 'round' ? vsPar(s.score, s.course_par) : null;
-  const noteExcerpt = s.note ? s.note.slice(0, 100) + (s.note.length > 100 ? '…' : '') : '';
-
   return `
     <div class="card session-card" id="card-${s.id}" onclick="cardClick(event, ${s.id})" style="cursor:pointer;">
       <div>
@@ -38,7 +36,6 @@ function renderCard(s) {
           ${s.rating ? `<span class="stars" title="${s.rating}/5">${stars(s.rating)}</span>` : ''}
         </div>
         <div class="venue">${s.venue_name || 'Unknown venue'}</div>
-        ${noteExcerpt ? `<div class="note-excerpt">${noteExcerpt}</div>` : ''}
         ${s.ai_summary
           ? `<div class="ai-summary" style="margin-top:.75rem;">${s.ai_summary.slice(0,200)}${s.ai_summary.length>200?'…':''}</div>`
           : aiEnabled ? `<div style="margin-top:.75rem;"><button class="btn btn-sm btn-secondary" onclick="regenerateSummary(${s.id}, this)">✨ Generate AI summary</button></div>` : ''
