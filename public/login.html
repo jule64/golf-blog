@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Golf Blog — Login</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; }
+    .login-card { background: white; border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 2rem 2.5rem; width: 100%; max-width: 360px; }
+    .login-card h1 { font-size: 1.3rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: .82rem; font-weight: 600; color: var(--gray-600); margin-bottom: .35rem; }
+    .field input { width: 100%; padding: .55rem .75rem; border: 1px solid var(--gray-200); border-radius: var(--radius); font-size: .95rem; }
+    .field input:focus { outline: 2px solid var(--green-light); border-color: transparent; }
+    .error { color: var(--red); font-size: .85rem; margin-bottom: .75rem; display: none; }
+    .btn-login { width: 100%; margin-top: .5rem; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <h1>⛳ Golf Blog</h1>
+    <div class="error" id="error-msg"></div>
+    <form id="login-form">
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-login">Sign in</button>
+    </form>
+  </div>
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const errorEl = document.getElementById('error-msg');
+      errorEl.style.display = 'none';
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          username: document.getElementById('username').value,
+          password: document.getElementById('password').value,
+        }),
+      });
+      if (res.ok) {
+        location.href = '/';
+      } else {
+        const { error } = await res.json();
+        errorEl.textContent = error;
+        errorEl.style.display = '';
+      }
+    });
+  </script>
+</body>
+</html>
