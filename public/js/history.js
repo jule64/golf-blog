@@ -38,7 +38,9 @@ function renderCard(s) {
         <div class="venue">${s.venue_name || 'Unknown venue'}</div>
         ${s.ai_summary
           ? `<div class="ai-summary" style="margin-top:.75rem;">${s.ai_summary.slice(0,200)}${s.ai_summary.length>200?'…':''}</div>`
-          : aiEnabled ? `<div style="margin-top:.75rem;"><button class="btn btn-sm btn-secondary" onclick="regenerateSummary(${s.id}, this)">✨ Generate AI summary</button></div>` : ''
+          : s.note
+            ? `<div class="ai-summary" style="margin-top:.75rem;">${s.note.slice(0,200)}${s.note.length>200?'…':''}</div>`
+            : aiEnabled ? `<div style="margin-top:.75rem;"><button class="btn btn-sm btn-secondary" onclick="regenerateSummary(${s.id}, this)">✨ Generate AI summary</button></div>` : ''
         }
       </div>
       <div style="text-align:right;">

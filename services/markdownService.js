@@ -39,7 +39,7 @@ export function writeSessionMarkdown(session, holes = [], scorecard = []) {
 
   const parMap = Object.fromEntries(scorecard.map(h => [h.hole, h]));
 
-  let holeSectionMd = '';
+  let scorecardTable = '';
   if (holes.length > 0 && scorecard.length > 0) {
     const rows = holes.map(h => {
       const sc = parMap[h.hole];
@@ -47,22 +47,14 @@ export function writeSessionMarkdown(session, holes = [], scorecard = []) {
       const diffStr = diff != null ? (diff >= 0 ? `+${diff}` : `${diff}`) : '';
       return `| ${h.hole} | ${sc?.par ?? ''} | ${sc?.yards ?? ''} | ${sc?.si ?? ''} | ${h.strokes} | ${diffStr} |`;
     });
-    holeSectionMd = `
-## Scorecard
-
-| Hole | Par | Yards | S.I. | Strokes | +/- |
+    scorecardTable = `| Hole | Par | Yards | S.I. | Strokes | +/- |
 |------|-----|-------|------|---------|-----|
-${rows.join('\n')}
-`;
+${rows.join('\n')}`;
   } else if (holes.length > 0) {
     const rows = holes.map(h => `| ${h.hole} | ${h.strokes} |`);
-    holeSectionMd = `
-## Scorecard
-
-| Hole | Strokes |
+    scorecardTable = `| Hole | Strokes |
 |------|---------|
-${rows.join('\n')}
-`;
+${rows.join('\n')}`;
   }
 
   const content = `---
@@ -83,12 +75,15 @@ ${scoreLine}
 
 ## My Notes
 
-${session.note || '_No notes._'}
+${session.note || ''}
 
 ## AI Summary
 
-${session.ai_summary || '_Generating…_'}
-${holeSectionMd}`;
+${session.ai_summary || ''}
+
+## Scorecard
+
+${scorecardTable}`;
 
   const filePath = sessionMarkdownPath(session);
   writeFileSync(filePath, content.trimStart(), 'utf8');

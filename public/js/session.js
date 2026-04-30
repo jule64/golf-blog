@@ -152,9 +152,7 @@ function render(s, scorecardHoles) {
       </div>
       <div class="ai-summary-full" id="ai-summary-text">${s.ai_summary}</div>
       ${s.note ? `<div class="card" id="note-text" style="display:none;"><p class="note-text">${s.note}</p></div>` : ''}
-    </div>` : ''}
-
-    ${s.note && !s.ai_summary ? `
+    </div>` : s.note ? `
     <div class="section">
       <div class="section-label">My Notes</div>
       <div class="card"><p class="note-text">${s.note}</p></div>
