@@ -1,7 +1,10 @@
 node_modules/
 .env
+key.pem
+cert.pem
 golf.db
 golf.db-shm
 golf.db-wal
 .claude/
 /.obsidian
+/test-http

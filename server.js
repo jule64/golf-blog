@@ -1,4 +1,6 @@
 import 'dotenv/config';
+import https from 'https';
+import fs from 'fs';
 import express from 'express';
 import session from 'express-session';
 import { fileURLToPath } from 'url';
@@ -12,12 +14,13 @@ import authRoutes from './routes/auth.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+app.set('trust proxy', 1);
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'golf-blog-dev-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { httpOnly: true },
+  cookie: { httpOnly: true, secure: true },
 }));
 
 app.use(express.json());
@@ -37,4 +40,10 @@ app.get('*', (req, res) => {
 initStore();
 
 const port = process.env.PORT || 3000;
-app.listen(port, () => console.log(`Golf tracker running at http://localhost:${port}`));
+const sslOptions = {
+  key: fs.readFileSync('./key.pem'),
+  cert: fs.readFileSync('./cert.pem'),
+};
+https.createServer(sslOptions, app).listen(port, () => {
+  console.log(`Golf tracker running at https://localhost:${port}`);
+});
