@@ -7,6 +7,8 @@ import { generateSessionSummary } from '../services/claudeService.js';
 
 const router = Router();
 
+const log = (msg) => console.log(`[${new Date().toISOString()}] ${msg}`);
+
 router.get('/', (req, res) => {
   res.json(getSessions(req.query.type));
 });
@@ -59,6 +61,7 @@ router.post('/', async (req, res) => {
   const relPath = writeSessionMarkdown(session, sessionHoles, scorecard);
   session = updateSession(session.id, { markdown_file: relPath });
 
+  log(`SESSION created — id=${session.id} type=${session.type} date=${session.date} venue="${session.venue_name}"`);
   res.status(201).json(session);
 });
 
@@ -105,6 +108,7 @@ router.put('/:id', async (req, res) => {
   const relPath = writeSessionMarkdown(session, sessionHoles, scorecard);
   session = updateSession(session.id, { markdown_file: relPath });
 
+  log(`SESSION updated — id=${session.id} type=${session.type} date=${session.date} venue="${session.venue_name}"`);
   res.json(session);
 });
 
@@ -113,6 +117,7 @@ router.delete('/:id', (req, res) => {
   if (!session) return res.status(404).json({ error: 'Session not found' });
   deleteSessionMarkdown(session.markdown_file);
   deleteSession(session.id);
+  log(`SESSION deleted — id=${session.id} type=${session.type} date=${session.date} venue="${session.venue_name}"`);
   res.json({ ok: true });
 });
 
@@ -132,6 +137,7 @@ router.post('/:id/regenerate-summary', async (req, res) => {
     let updated = updateSession(session.id, { ai_summary: aiSummary });
     const relPath = writeSessionMarkdown(updated, updated.holes, scorecard);
     updateSession(session.id, { markdown_file: relPath });
+    log(`AI SUMMARY regenerated — id=${session.id}`);
     res.json({ ai_summary: aiSummary });
   } catch (e) {
     res.status(500).json({ error: e.message });

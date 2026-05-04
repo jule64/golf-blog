@@ -6,6 +6,8 @@ import { writeScorecardMarkdown, deleteScorecardMarkdown, deleteSessionMarkdown 
 
 const router = Router();
 
+const log = (msg) => console.log(`[${new Date().toISOString()}] ${msg}`);
+
 router.get('/', (req, res) => {
   res.json(getVenues());
 });
@@ -24,6 +26,7 @@ router.post('/', (req, res) => {
   // Write stub markdown so the venue persists across restarts
   const relPath = writeScorecardMarkdown(venue, []);
   const withPath = updateVenue(venue.id, { markdown_file: relPath });
+  log(`VENUE created — id=${venue.id} name="${venue.name}"`);
   res.status(201).json(withPath);
 });
 
@@ -38,6 +41,7 @@ router.put('/:id', (req, res) => {
   }
 
   const updated = updateVenue(venue.id, { name: name.trim(), markdown_file: null });
+  log(`VENUE updated — id=${venue.id} name="${updated.name}"`);
   res.json(updated);
 });
 
@@ -72,6 +76,7 @@ router.delete('/:id', (req, res) => {
 
   deleteScorecardMarkdown(venue.markdown_file);
   deleteVenueWithSessions(venue.id);
+  log(`VENUE deleted — id=${venue.id} name="${venue.name}"`);
   res.json({ ok: true });
 });
 
