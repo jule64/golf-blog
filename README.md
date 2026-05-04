@@ -34,12 +34,34 @@ A personal golf round tracker and blog. Log rounds and practice sessions, track 
 
 ## Setup
 
+### 1. Generate a local SSL certificate
+
+The app runs over HTTPS and expects `key.pem` and `cert.pem` in the project root. Generate them with:
+
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes -subj "/CN=localhost"
+```
+
+Your browser will warn about the self-signed cert — just accept the exception.
+
+### 2. Configure credentials
+
+Copy `.env.example` to `.env` and set your login credentials and session secret:
+
+```
+AUTH_USERNAME=your_username
+AUTH_PASSWORD=your_password
+SESSION_SECRET=some_random_string
+```
+
+### 3. Install and run
+
 ```bash
 npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [https://localhost:3000](https://localhost:3000).
 
 ## Usage
 
@@ -67,18 +89,18 @@ Use the **Edit** / **Delete** buttons on any history card or session detail page
 
 ```
 ├── server.js
-├── db/
-│   ├── schema.sql
-│   └── database.js
+├── middleware/
+│   └── auth.js              # Session-based auth guard
 ├── routes/
+│   ├── auth.js
 │   ├── sessions.js
 │   ├── scorecards.js
 │   └── stats.js
 ├── services/
+│   ├── store.js             # In-memory store, loaded from markdown on startup
 │   ├── claudeService.js     # AI summary generation
 │   ├── markdownService.js   # Read/write .md files
-│   ├── statsService.js      # Score calculations
-│   └── syncService.js       # Import scorecards from markdown on startup
+│   └── statsService.js      # Score calculations
 ├── rounds/                  # One .md file per session (auto-created)
 ├── scorecards/              # One .md file per venue
 └── public/                  # Frontend (HTML + vanilla JS + CSS)

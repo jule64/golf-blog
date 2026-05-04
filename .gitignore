@@ -5,7 +5,7 @@ cert.pem
 golf.db
 golf.db-shm
 golf.db-wal
-.claude/
 /.obsidian
+.claude/settings.local.json
 /test-http
 /rounds
